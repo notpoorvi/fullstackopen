@@ -5,7 +5,7 @@ participant server
 
     Note right of browser: User clicks the save button
     activate server
-    server-->>browser: POST new_note, status code 302: URL Redirect
+    server-->>browser: POST new_note, status code 302: Prompt Browser to Redirect
     deactivate server
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/notes

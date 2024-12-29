@@ -3,13 +3,7 @@ sequenceDiagram
 participant browser
 participant server
 
-    Note right of browser: User clicks the save button
-    browser->>server: POST new_note https://studies.cs.helsinki.fi/exampleapp/new_note
-    activate server
-    server-->>browser: status code 302: Prompt Browser to Redirect
-    deactivate server
-
-    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/notes
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa
     activate server
     server-->>browser: HTML document
     deactivate server
@@ -19,7 +13,7 @@ participant server
     server-->>browser: the css file
     deactivate server
 
-    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa.js
     activate server
     server-->>browser: the JavaScript file
     deactivate server

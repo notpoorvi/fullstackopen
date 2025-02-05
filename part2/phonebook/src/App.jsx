@@ -1,5 +1,56 @@
 import { useState } from "react";
 
+const Filter = ({ searchVal, handleSearchValChange }) => {
+  return (
+    <>
+      <span>filter shown with </span>
+      <input type="text" value={searchVal} onChange={handleSearchValChange} />
+    </>
+  );
+};
+
+const PersonForm = ({
+  addNameNumber,
+  newName,
+  newNumber,
+  handleNameChange,
+  handleNumChange,
+}) => {
+  return (
+    <>
+      <form onSubmit={addNameNumber}>
+        <div>
+          name: <input value={newName} onChange={handleNameChange} />
+        </div>
+        <div>
+          number: <input value={newNumber} onChange={handleNumChange} />
+        </div>
+        <div>
+          <button type="submit">add</button>
+        </div>
+      </form>
+    </>
+  );
+};
+
+const Persons = ({ persons, searchVal }) => {
+  return (
+    <>
+      {persons
+        .filter(
+          (person) =>
+            searchVal === "" ||
+            person.name.toLowerCase().includes(searchVal.toLowerCase())
+        )
+        .map((person) => (
+          <div key={person.name}>
+            {person.name} {person.number}
+          </div>
+        ))}
+    </>
+  );
+};
+
 const App = () => {
   const [persons, setPersons] = useState([
     { name: "Arto Hellas", number: "040-123456", id: 1 },
@@ -43,47 +94,20 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <span>filter shown with </span>
-      <input type="text" value={searchVal} onChange={handleSearchValChange} />
+      <Filter
+        searchVal={searchVal}
+        handleSearchValChange={handleSearchValChange}
+      />
       <h2>add a new</h2>
-      <form onSubmit={addNameNumber}>
-        <div>
-          name: <input value={newName} onChange={handleNameChange} />
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={handleNumChange} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <PersonForm
+        addNameNumber={addNameNumber}
+        newName={newName}
+        newNumber={newNumber}
+        handleNameChange={handleNameChange}
+        handleNumChange={handleNumChange}
+      />
       <h2>Numbers</h2>
-      {persons
-        .filter(
-          (person) =>
-            searchVal === "" ||
-            person.name.toLowerCase().includes(searchVal.toLowerCase())
-        )
-        .map((person) => (
-          <div key={person.name}>
-            {person.name} {person.number}
-          </div>
-        ))}
-      {searchVal === ""
-        ? persons.map((person) => (
-            <div key={person.name}>
-              {person.name} {person.number}
-            </div>
-          ))
-        : persons
-            .filter((person) =>
-              person.name.toLowerCase().includes(searchVal.toLowerCase())
-            )
-            .map((person) => (
-              <div key={person.name}>
-                {person.name} {person.number}
-              </div>
-            ))}
+      <Persons persons={persons} searchVal={searchVal} />
     </div>
   );
 };

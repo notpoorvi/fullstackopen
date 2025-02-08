@@ -35,6 +35,28 @@ const PersonForm = ({
   );
 };
 
+const Notification = ({ message, color, hide }) => {
+  const styles = {
+    color: color,
+    background: "lightgrey",
+    fontSize: "20px",
+    borderStyle: "solid",
+    borderRadius: "5px",
+    padding: "10px",
+    marginBottom: "10px",
+    display: hide ? "none" : "",
+  };
+
+  if (message === null) {
+    return null;
+  }
+  return (
+    <div style={styles} className="error">
+      {message}
+    </div>
+  );
+};
+
 const Persons = ({ persons, searchVal, handleDelete }) => {
   return (
     <>
@@ -59,12 +81,24 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchVal, setSearchVal] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [notifyColor, setNotifyColor] = useState("green");
+  const [notifyHide, setNotifyHide] = useState(true);
 
   useEffect(() => {
     personService.getAll("http://localhost:3001/persons").then((personData) => {
       setPersons(personData);
     });
   }, []);
+
+  const modifyError = (hide, color, errorMsg) => {
+    setNotifyHide(hide);
+    setNotifyColor(color);
+    setErrorMessage(errorMsg);
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 5000);
+  };
 
   const addNameNumber = (event) => {
     event.preventDefault();
@@ -93,7 +127,15 @@ const App = () => {
                   person.id === duplicate.id ? returnedPerson : person
                 )
               );
+            })
+            .catch((error) => {
+              modifyError(
+                false,
+                "red",
+                `Information of ${newName} has already been removed from the server`
+              );
             });
+          modifyError(false, "green", `Updated phone number of ${newName}`);
         }
         setNewName("");
         setNewNumber("");
@@ -105,6 +147,7 @@ const App = () => {
       setNewName("");
       setNewNumber("");
     });
+    modifyError(false, "green", `Added ${newName}`);
   };
 
   const handleNameChange = (event) => {
@@ -125,12 +168,18 @@ const App = () => {
       const newPersons = persons.filter((person) => person !== personToDelete);
       personService.deletePerson(id);
       setPersons(newPersons);
+      modifyError(false, "green", `Deleted ${personToDelete.name}`);
     }
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification
+        message={errorMessage}
+        hide={notifyHide}
+        color={notifyColor}
+      />
       <Filter
         searchVal={searchVal}
         handleSearchValChange={handleSearchValChange}

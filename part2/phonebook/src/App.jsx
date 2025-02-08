@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import personService from "./services/persons";
 
 const Filter = ({ searchVal, handleSearchValChange }) => {
   return (
@@ -34,7 +35,7 @@ const PersonForm = ({
   );
 };
 
-const Persons = ({ persons, searchVal }) => {
+const Persons = ({ persons, searchVal, handleDelete }) => {
   return (
     <>
       {persons
@@ -44,8 +45,9 @@ const Persons = ({ persons, searchVal }) => {
             person.name.toLowerCase().includes(searchVal.toLowerCase())
         )
         .map((person) => (
-          <div key={person.name}>
+          <div key={person.id}>
             {person.name} {person.number}
+            <button onClick={() => handleDelete(person.id)}>delete</button>
           </div>
         ))}
     </>
@@ -58,14 +60,11 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [searchVal, setSearchVal] = useState("");
 
-  const hook = () => {
-    axios.get("http://localhost:3001/persons").then((respone) => {
-      const data = respone.data;
-      setPersons(data);
+  useEffect(() => {
+    personService.getAll("http://localhost:3001/persons").then((personData) => {
+      setPersons(personData);
     });
-  };
-
-  useEffect(hook, []);
+  }, []);
 
   const addNameNumber = (event) => {
     event.preventDefault();
@@ -73,15 +72,39 @@ const App = () => {
       name: newName,
       number: newNumber,
     };
-    if (persons.filter((person) => person.name == newName).length > 0) {
-      alert(`${newName} is already added to phonebook`);
-      setNewNumber("");
-      setNewName("");
-      return;
+    const duplicate = persons.find((person) => person.name === newName);
+    if (duplicate) {
+      if (duplicate.number === newNumber) {
+        alert(`${newName} is already added to phonebook`);
+        setNewNumber("");
+        setNewName("");
+        return;
+      } else {
+        if (
+          window.confirm(
+            `${duplicate.name} is already added to phonebook, replace the old number with a new one?`
+          )
+        ) {
+          personService
+            .update(duplicate.id, personObject)
+            .then((returnedPerson) => {
+              setPersons(
+                persons.map((person) =>
+                  person.id === duplicate.id ? returnedPerson : person
+                )
+              );
+            });
+        }
+        setNewName("");
+        setNewNumber("");
+        return;
+      }
     }
-    setPersons(persons.concat(personObject));
-    setNewName("");
-    setNewNumber("");
+    personService.create(personObject).then((responseData) => {
+      setPersons(persons.concat(responseData));
+      setNewName("");
+      setNewNumber("");
+    });
   };
 
   const handleNameChange = (event) => {
@@ -94,6 +117,15 @@ const App = () => {
 
   const handleSearchValChange = (event) => {
     setSearchVal(event.target.value);
+  };
+
+  const handleDelete = (id) => {
+    const personToDelete = persons.find((person) => person.id === id);
+    if (window.confirm(`Delete ${personToDelete.name}?`)) {
+      const newPersons = persons.filter((person) => person !== personToDelete);
+      personService.deletePerson(id);
+      setPersons(newPersons);
+    }
   };
 
   return (
@@ -112,7 +144,11 @@ const App = () => {
         handleNumChange={handleNumChange}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} searchVal={searchVal} />
+      <Persons
+        persons={persons}
+        searchVal={searchVal}
+        handleDelete={handleDelete}
+      />
     </div>
   );
 };

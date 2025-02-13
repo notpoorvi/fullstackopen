@@ -1,29 +1,31 @@
 import { useState, useEffect } from "react";
-import data from "./countriesService/countries";
-import { Linter } from "eslint";
+import data from "./countriesService/coutries.js";
 
 const ShowCountry = ({ country }) => {
   const [countryObj, setCountryObj] = useState({});
+  const [languages, setLanguages] = useState([]);
+  const [flag, setFlag] = useState("");
   useEffect(() => {
     if (country) {
-      data.getCountry(country.name.common).then((country) => {
-        setCountryObj(country);
+      data.getCountry(country.name.common).then((countryData) => {
+        setCountryObj(countryData);
+        setLanguages(Object.values(countryData.languages));
+        setFlag(countryData.flags.png);
       });
     }
   }, [country]);
-  console.log(countryObj);
-  const languages = Object.values(countryObj.languages);
   return (
     <>
       <h2>{country.name.common}</h2>
       <div>capital {countryObj.capital}</div>
       <div>area {countryObj.area}</div>
       <h3>languages:</h3>
-      {/* <ul>
+      <ul>
         {languages.map((language) => (
-          <li>language</li>
+          <li key={language}>{language}</li>
         ))}
-      </ul> */}
+      </ul>
+      {flag && <img src={flag}></img>}
     </>
   );
 };
@@ -31,6 +33,7 @@ const ShowCountry = ({ country }) => {
 function App() {
   const [input, setInput] = useState("");
   const [countries, setCountries] = useState([]);
+  const [showCountry, setShowCountry] = useState(null);
 
   const handleSearchChange = (event) => {
     setInput(event.target.value);
@@ -44,31 +47,35 @@ function App() {
     country.name.common.toLowerCase().includes(input.toLowerCase())
   );
 
+  const handleShow = (country) => {
+    setShowCountry(country);
+    return;
+    // return <ShowCountry country={country} />;
+  };
+
   return (
     <>
       <span>find countries</span>
       <input type="text" value={input} onChange={handleSearchChange} />
-
-      {countriesToShow.length < 10 ? (
+      {input !== "" && countriesToShow.length > 10 && (
+        <div>Too many matches, specify another filter</div>
+      )}
+      {countriesToShow.length === 1 && (
         <>
-          {countriesToShow.length === 1 ? (
-            <ShowCountry country={countriesToShow[0]} />
-          ) : (
-            // <div>{data.getCountry(countriesToShow[0].name.common)}</div>
-            countriesToShow.map((country) => (
-              <div key={country.name.official}>{country.name.common}</div>
-            ))
-          )}
-        </>
-      ) : (
-        <>
-          {input === "" ? (
-            <div></div>
-          ) : (
-            <div>Too many matches, specify another filter</div>
-          )}
+          <ShowCountry country={countriesToShow[0]} />
         </>
       )}
+      {countriesToShow.length < 10 &&
+        countriesToShow.length > 1 &&
+        countriesToShow.map((country) => (
+          <div key={country.ccn3}>
+            <span>{country.name.common}</span>
+            <button onClick={() => handleShow(country)}>show</button>
+            {showCountry && showCountry.name.common === country.name.common && (
+              <ShowCountry country={showCountry} />
+            )}
+          </div>
+        ))}
     </>
   );
 }

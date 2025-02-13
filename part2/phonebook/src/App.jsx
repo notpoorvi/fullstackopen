@@ -86,7 +86,7 @@ const App = () => {
   const [notifyHide, setNotifyHide] = useState(true);
 
   useEffect(() => {
-    personService.getAll("http://localhost:3001/persons").then((personData) => {
+    personService.getAll().then((personData) => {
       setPersons(personData);
     });
   }, []);

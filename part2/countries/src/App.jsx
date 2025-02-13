@@ -3,6 +3,9 @@ import data from "./countriesService/coutries.js";
 
 const ShowCountry = ({ country }) => {
   const [countryObj, setCountryObj] = useState({});
+  const [temp, setTemp] = useState(null);
+  const [icon, setIcon] = useState("");
+  const [wind, setWind] = useState("");
   const [languages, setLanguages] = useState([]);
   const [flag, setFlag] = useState("");
   useEffect(() => {
@@ -12,11 +15,16 @@ const ShowCountry = ({ country }) => {
         setLanguages(Object.values(countryData.languages));
         setFlag(countryData.flags.png);
       });
+      data.getWeather(country.capital[0]).then((weather) => {
+        setTemp(weather.main.temp);
+        setIcon(weather.weather[0].icon);
+        setWind(weather.wind.speed);
+      });
     }
   }, [country]);
   return (
     <>
-      <h2>{country.name.common}</h2>
+      <h1>{country.name.common}</h1>
       <div>capital {countryObj.capital}</div>
       <div>area {countryObj.area}</div>
       <h3>languages:</h3>
@@ -26,6 +34,10 @@ const ShowCountry = ({ country }) => {
         ))}
       </ul>
       {flag && <img src={flag}></img>}
+      <h2>Weather in {country.capital}</h2>
+      <div>temperature {temp} Celsius</div>
+      <img src={`https://openweathermap.org/img/wn/${icon}@2x.png`} alt="" />
+      <div>wind {wind} m/s</div>
     </>
   );
 };

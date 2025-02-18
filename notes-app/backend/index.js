@@ -47,7 +47,7 @@ app.get('/api/notes', (request, response) => {
 })
 // handle HTTP GET requests made to a particular note from application
 app.get('/api/notes/:id', (request, response) => {
-    const id = request.params.id
+    const id = Number(request.params.id)
     const note = notes.find(note => note.id === id)
     if (note) {
         response.json(note)
@@ -61,7 +61,7 @@ app.get('/api/notes/:id', (request, response) => {
 
 // handle delete requests
 app.delete('/api/notes/:id', (request, response) => {
-    const id = request.params.id
+    const id = Number(request.params.id)
     notes = notes.filter(note => Number(note.id) !== id)
 
     response.status(204).end()
@@ -69,9 +69,9 @@ app.delete('/api/notes/:id', (request, response) => {
 
 const generateID = () => {
     const maxId = notes.length > 0
-        ? Math.max(...notes.map(n => Number(n.id)))
+        ? Math.max(...notes.map(n => n.id))
         : 0
-    return String(maxId + 1)
+    return maxId + 1
 }
 
 app.put('/api/notes/:id', (request, response) => {
@@ -95,7 +95,7 @@ app.post('/api/notes/', (request, response) => {
     const note = {
         content: body.content,
         important: body.important || false,
-        id: String(generateID()),
+        id: generateID(),
     }
     notes = notes.concat(note)
     response.json(note)

@@ -28,8 +28,8 @@ const Footer = () => {
 const App = () => {
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState("");
-  const [showAll, setShowAll] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [showAll, setShowAll] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     noteService.getAll().then((initialNotes) => {
@@ -96,7 +96,7 @@ const App = () => {
         <input value={newNote} onChange={handleNoteChange} />
         <button type="submit">save</button>
       </form>
-      <Footer></Footer>
+      <Footer />
     </div>
   );
 };
